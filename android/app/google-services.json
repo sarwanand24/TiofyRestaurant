@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "349141907942",
+    "project_id": "tiofyrestaurant",
+    "storage_bucket": "tiofyrestaurant.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:349141907942:android:49e3b5b8e375e89181fe27",
+        "android_client_info": {
+          "package_name": "com.tiofyrestaurant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_sZGfwoVWK1-Is56T0pcWG4SyfNNzImI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
