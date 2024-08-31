@@ -112,8 +112,6 @@ const RestroProfile = () => {
     }
 };
 
-
-
   useEffect(() => {
     const fetchRestaurantDetails = async () => {
       try {

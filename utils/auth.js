@@ -32,9 +32,7 @@ export const refreshToken = async () => {
 // Function to get the access token
 export const getAccessToken = async () => {
   let token = await AsyncStorage.getItem('token');
-  let restro = await AsyncStorage.getItem('Restrodata')
   console.log('token 23', token);
-  console.log('restro 23', restro);
   if (isTokenExpired(token)) {
     token = await refreshToken();
   }

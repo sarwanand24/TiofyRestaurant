@@ -9,6 +9,7 @@ import AuthScreen from './Screens/Authentication/AuthScreen';
 import RestroDashboard from './Screens/RestroDashboard';
 import RestroProfile from './Screens/RestroProfile';
 import OrderHistory from './Screens/OrderHistory';
+import CancelledOrders from './Screens/CancelledOrders';
 import Loading from './Screens/Loading';
 
 const Stack = createStackNavigator();
@@ -28,6 +29,7 @@ const App = () => {
         <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name="RestroDashboard" component={RestroDashboard} />
         <Stack.Screen name="RestroProfile" component={RestroProfile} />
+        <Stack.Screen name="CancelledOrders" component={CancelledOrders} />
         <Stack.Screen name="OrderHistory" component={OrderHistory} />
         <Stack.Screen name="Loading" component={Loading} />
       </Stack.Navigator>

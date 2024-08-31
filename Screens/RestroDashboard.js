@@ -13,11 +13,12 @@ const RestroDashboard = (props) => {
   const [orderData, setOrderData] = useState([]);
   const [refresh, setRefresh] = useState(false);
   const [userInfo, setUserInfo] = useState({});
-  const [loading, setLoading] = useState(true); // Set initial loading to true
+  const [loading, setLoading] = useState(false); 
 
   useEffect(() => {
     const fetchRestaurantDetails = async () => {
       try {
+        setLoading(true)
         const token = await getAccessToken();
         const response = await axios.get('https://trioserver.onrender.com/api/v1/restaurants/current-restaurant', {
           headers: {
@@ -27,6 +28,7 @@ const RestroDashboard = (props) => {
         setRestaurant(response.data.data);
       } catch (error) {
         console.error('Error fetching restaurant details:', error);
+        setLoading(false);
       } finally {
         setLoading(false);
       }
@@ -52,14 +54,6 @@ const RestroDashboard = (props) => {
       });
       setOrderData(response.data.data);
       setOrderInfo(response.data.data.length > 0);
-      setUserInfo({
-        address: response.data?.data[0]?.userAddress,
-        userId: response.data?.data[0]?.userId,
-        foodItems: response.data?.data[0]?.foodItems,
-        totalItems: response.data?.data[0]?.totalItems,
-        bill: response.data?.data[0]?.bill,
-        restroBill: response.data?.data[0]?.restroBill,
-      });
     } catch (error) {
       console.log('Error fetching Accept/Reject:', error);
       alert('Error fetching Accept/Reject');
@@ -113,18 +107,19 @@ const RestroDashboard = (props) => {
     }
   }
 
-  const OrderAccepted = (restroId) => {
+  const OrderAccepted = (restro) => {
     const city = restaurant.city;
     const restroName = restaurant.restaurantName;
     const restroAddress = restaurant.address;
     socket.emit('RestaurantAcceptedOrder', {
-      restroId,
-      userAddress: userInfo.address,
-      userId: userInfo.userId,
-      foodItems: userInfo.foodItems,
-      totalItems: userInfo.totalItems,
-      bill: userInfo.bill,
-      restroBill: userInfo.restroBill,
+      restroId: restro._id,
+      userAddress: restro.userAddress,
+      userId: restro.userId,
+      foodItems: restro.foodItems,
+      totalItems: restro.totalItems,
+      bill: restro.bill,
+      restroBill: restro.restroBill,
+      riderEarning: restro.riderEarning,
       city,
       restroName,
       restroAddress,
@@ -132,8 +127,8 @@ const RestroDashboard = (props) => {
     setRefresh(true);
   };
 
-  const OrderRejected = (restroId) => {
-    socket.emit('RestaurantRejectedOrder', { restroId, userId: userInfo.userId });
+  const OrderRejected = (restro) => {
+    socket.emit('RestaurantRejectedOrder', { restroId: restro._id, userId: restro.userId });
     setRefresh(true);
   };
 
@@ -149,32 +144,34 @@ const RestroDashboard = (props) => {
       <Text style={styles.totalItems}>Total Items: {item.totalItems}</Text>
       <Text style={styles.totalItems}>Earnings: Rs {item.restroBill}</Text>
       <View style={styles.buttonContainer}>
-        <Button title="Accept" onPress={() => OrderAccepted(item._id)} color="#00FF00" />
-        <Button title="Reject" onPress={() => OrderRejected(item._id)} color="#FF0000" />
+        <Button title="Accept" onPress={() => OrderAccepted(item)} color="#00FF00" />
+        <Button title="Reject" onPress={() => OrderRejected(item)} color="#FF0000" />
       </View>
     </View>
   );
 
-  useEffect(() => {
-    const handleOrderInform = (data) => {
-      if (data.restroId === restaurant._id) {
-        setUserInfo({
-          address: data.userAddress,
-          userId: data.userId,
-          foodItems: data.newSelectedFoods,
-          totalItems: data.newTotalItems,
-          bill: data.newTotalAmount,
-        });
-        setRefresh(true);
-      }
-    };
+  // useEffect(() => {
+  //   const handleOrderInform = (data) => {
+  //     if (data.restroId === restaurant._id) {
+  //       setUserInfo({
+  //         address: data.userAddress,
+  //         userId: data.userId,
+  //         foodItems: data.newSelectedFoods,
+  //         totalItems: data.newTotalItems,
+  //         bill: data.newTotalAmount,
+  //         restroBill: data.restroBill,
+  //         riderEarning: data.riderEarning
+  //       });
+  //       setRefresh(true);
+  //     }
+  //   };
 
-    socket.on('RestaurantOrderInform', handleOrderInform);
+  //   socket.on('RestaurantOrderInform', handleOrderInform);
 
-    return () => {
-      socket.off('RestaurantOrderInform', handleOrderInform);
-    };
-  }, [restaurant._id]);
+  //   return () => {
+  //     socket.off('RestaurantOrderInform', handleOrderInform);
+  //   };
+  // }, [restaurant._id]);
 
   if (loading) {
     return <Loading />;
@@ -208,6 +205,13 @@ const RestroDashboard = (props) => {
           <Text style={styles.noOrdersText}>No orders yet.</Text>
         </View>
       )}
+      <TouchableOpacity
+        style={styles.historyButton}
+        onPress={() => props.navigation.push('CancelledOrders')}
+      >
+        <Text style={styles.historyButtonText}>See All Cancelled Orders</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity
         style={styles.historyButton}
         onPress={() => props.navigation.push('OrderHistory')}
