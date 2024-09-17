@@ -8,6 +8,7 @@ import { getAccessToken } from '../utils/auth';
 const RestroProfile = () => {
   const [restaurant, setRestaurant] = useState({});
   const [loading, setLoading] = useState(false);
+  const [availableStatus, setAvailableStatus] = useState(true);
 
   const checkLocationPermission = async () => {
     try {
@@ -125,6 +126,7 @@ const RestroProfile = () => {
         });
 
         setRestaurant(response.data.data);
+        setAvailableStatus(response.data.data.availableStatus);
       } catch (error) {
         console.error('Error fetching restaurant details:', error);
       } finally {
@@ -134,6 +136,36 @@ const RestroProfile = () => {
 
     fetchRestaurantDetails();
   }, []);
+
+  const toggleAvailableStatus = async() => {
+    try {
+      const token = await getAccessToken();
+      const response = await axios.post(
+        'https://trioserver.onrender.com/api/v1/restaurants/toggle-availability',
+        { availableStatus: !availableStatus },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status === 200) {
+        setAvailableStatus(!availableStatus);
+        ToastAndroid.showWithGravity(
+          `Restaurant is now ${!availableStatus ? 'Available' : 'Not Available'}`,
+          ToastAndroid.SHORT,
+          ToastAndroid.CENTER
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling availableStatus:', error);
+      ToastAndroid.showWithGravity(
+        "Failed to update availability.",
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    }
+  }
 
   if (loading) {
     return <Loading />;
@@ -159,6 +191,12 @@ const RestroProfile = () => {
           onPress={checkLocationPermission}
           color="#FF007F" // Neon pink color
         />
+
+<Button
+  title={availableStatus ? 'Available' : 'Not Available'}
+  onPress={toggleAvailableStatus}
+  color={availableStatus ? '#00FF00' : '#FF0000'} // Green for available, red for not available
+/>
 
         <View style={styles.detailsContainer}>
           <View style={styles.card}>

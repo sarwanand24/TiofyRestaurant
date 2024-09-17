@@ -12,7 +12,6 @@ const RestroDashboard = (props) => {
   const [orderInfo, setOrderInfo] = useState(false);
   const [orderData, setOrderData] = useState([]);
   const [refresh, setRefresh] = useState(false);
-  const [userInfo, setUserInfo] = useState({});
   const [loading, setLoading] = useState(false); 
 
   useEffect(() => {
@@ -37,13 +36,6 @@ const RestroDashboard = (props) => {
     fetchRestaurantDetails();
   }, []);
 
-  useEffect(() => {
-    fetchAcceptReject(); // Fetch orders initially
-    const interval = setInterval(fetchAcceptReject, 10000); // Fetch orders every 10 seconds
-
-    return () => clearInterval(interval); // Clear interval on component unmount
-  }, [refresh]);
-
   const fetchAcceptReject = async () => {
     try {
       const token = await getAccessToken();
@@ -59,6 +51,13 @@ const RestroDashboard = (props) => {
       alert('Error fetching Accept/Reject');
     }
   };
+
+  useEffect(() => {
+    fetchAcceptReject(); // Fetch orders initially
+    const interval = setInterval(fetchAcceptReject, 10000); // Fetch orders every 10 seconds
+
+    return () => clearInterval(interval); // Clear interval on component unmount
+  }, [refresh]);
 
   useEffect(() => {
     const requestPermissions = async () => {
@@ -149,29 +148,6 @@ const RestroDashboard = (props) => {
       </View>
     </View>
   );
-
-  // useEffect(() => {
-  //   const handleOrderInform = (data) => {
-  //     if (data.restroId === restaurant._id) {
-  //       setUserInfo({
-  //         address: data.userAddress,
-  //         userId: data.userId,
-  //         foodItems: data.newSelectedFoods,
-  //         totalItems: data.newTotalItems,
-  //         bill: data.newTotalAmount,
-  //         restroBill: data.restroBill,
-  //         riderEarning: data.riderEarning
-  //       });
-  //       setRefresh(true);
-  //     }
-  //   };
-
-  //   socket.on('RestaurantOrderInform', handleOrderInform);
-
-  //   return () => {
-  //     socket.off('RestaurantOrderInform', handleOrderInform);
-  //   };
-  // }, [restaurant._id]);
 
   if (loading) {
     return <Loading />;
