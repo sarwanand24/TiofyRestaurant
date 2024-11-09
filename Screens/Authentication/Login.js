@@ -72,12 +72,15 @@ import Loading from '../Loading';
     setError(''); // Clear any previous errors
     try {
       // Step 1: Get Restro Details from your API
+      console.log(mobileNo)
       const response = await axios.post('https://trioserver.onrender.com/api/v1/restaurants/login', { mobileNo });
       setRestroDetails(response.data.data);
-
+      console.log("checking1")
       // Step 2: Send OTP using Firebase
       const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+      console.log("checking2")
       signInWithPhoneNumber(`+91 ${mobileNo}`);
+      console.log("checking3")
       setIsOtpSent(true);
     } catch (error) {
       setError('Failed to send OTP. Please try again.'); 
