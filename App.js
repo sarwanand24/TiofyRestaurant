@@ -3,10 +3,10 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import SplashScreen from './Screens/SplashScreen';
+import MainApp from './Screens/BottomNavigation';
 import Login from './Screens/Authentication/Login';
 import Signup from './Screens/Authentication/Signup';
 import AuthScreen from './Screens/Authentication/AuthScreen';
-import RestroDashboard from './Screens/RestroDashboard';
 import RestroProfile from './Screens/RestroProfile';
 import OrderHistory from './Screens/OrderHistory';
 import CancelledOrders from './Screens/CancelledOrders';
@@ -27,7 +27,7 @@ const App = () => {
         <Stack.Screen name="Auth" component={AuthScreen} /> 
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
-        <Stack.Screen name="RestroDashboard" component={RestroDashboard} />
+        <Stack.Screen name="MainApp" component={MainApp} />
         <Stack.Screen name="RestroProfile" component={RestroProfile} />
         <Stack.Screen name="CancelledOrders" component={CancelledOrders} />
         <Stack.Screen name="OrderHistory" component={OrderHistory} />

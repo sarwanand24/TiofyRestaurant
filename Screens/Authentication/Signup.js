@@ -93,7 +93,7 @@ const Signup = (props) => {
       await AsyncStorage.setItem("token", response.data.data.refreshToken);
       await AsyncStorage.setItem("Restrodata", JSON.stringify(response.data.data.Restaurant));
       props.navigation.pop(); 
-      props.navigation.replace('RestroDashboard'); 
+      props.navigation.replace('MainApp'); 
     } catch (error) {
       console.error(error);
       // Handle error

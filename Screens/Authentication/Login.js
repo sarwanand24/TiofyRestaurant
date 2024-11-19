@@ -1,17 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
 import axios from 'axios';
-import auth from '@react-native-firebase/auth';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
 import Loading from '../Loading';
+import socket from '../../utils/Socket';
 
  const Login = (props) => {
-  const [mobileNo, setMobileNo] = useState('');
+  const [email, setemail] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const[otpMade, setOtpMade] = useState('');
   const [isOtpSent, setIsOtpSent] = useState(false);
   const [restroDetails, setRestroDetails] = useState(null);
-  const [confirm, setConfirm] = useState(null);
   const [loading, setLoading] = useState(false); // Add loading state
   const [error, setError] = useState(''); // Add error state
 
@@ -57,31 +57,19 @@ import Loading from '../Loading';
     ).start();
   }, []);
 
-  // Handle user authentication state change
-  async function onAuthStateChanged(user) {
-    if (user) {
-      // await AsyncStorage.setItem("token", restroDetails.accessToken);
-      // await AsyncStorage.setItem("Restrodata", JSON.stringify(restroDetails.restro));
-      // props.navigation.replace('RestroDashboard'); 
-    }
-  }
-
   // Handle sending OTP
   const handleSendOtp = async () => {
     setLoading(true); // Set loading true when API call starts
     setError(''); // Clear any previous errors
     try {
       // Step 1: Get Restro Details from your API
-      console.log(mobileNo)
-      const response = await axios.post('https://trioserver.onrender.com/api/v1/restaurants/login', { mobileNo });
+      console.log(email)
+      const generatedOtp = Math.floor(100000 + Math.random() * 900000);
+      setOtpMade(generatedOtp);
+      const response = await axios.post('https://trioserver.onrender.com/api/v1/restaurants/login', { email, otp: generatedOtp });
       setRestroDetails(response.data.data);
-      console.log("checking1")
-      // Step 2: Send OTP using Firebase
-      const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-      console.log("checking2")
-      signInWithPhoneNumber(`+91 ${mobileNo}`);
-      console.log("checking3")
-      setIsOtpSent(true);
+      console.log("OTP:", generatedOtp)
+      setIsOtpSent(true)
     } catch (error) {
       setError('Failed to send OTP. Please try again.'); 
     } finally {
@@ -89,23 +77,18 @@ import Loading from '../Loading';
     }
   };
 
-  // Send OTP via Firebase
-  async function signInWithPhoneNumber(phoneNumber) {
-    const confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-    setConfirm(confirmation);
-  }
-
   // Verify OTP
   async function handleVerifyOtp() {
     setLoading(true); // Set loading true when verifying OTP
     setError(''); // Clear any previous errors
     try {
       const enteredOtp = otp.join('');
-      await confirm.confirm(enteredOtp);
-      await AsyncStorage.setItem("token", restroDetails.refreshToken);
-      await AsyncStorage.setItem("Restrodata", JSON.stringify(restroDetails.Restaurant));
-      props.navigation.pop(); 
-      props.navigation.replace('RestroDashboard'); 
+       if(enteredOtp == otpMade){
+        await AsyncStorage.setItem("token", restroDetails.refreshToken);
+        await AsyncStorage.setItem("Restrodata", JSON.stringify(restroDetails.Restaurant));
+        props.navigation.pop(); 
+        props.navigation.replace('MainApp'); 
+       }
     } catch (error) {
       setError('Invalid OTP. Please try again.'); 
     } finally {
@@ -143,12 +126,10 @@ import Loading from '../Loading';
               <Animated.View style={[styles.inputContainer, { transform: [{ scale: inputAnimation }] }]}>
                 <TextInput
                   style={styles.input}
-                  placeholder="Mobile Number"
+                  placeholder="Email"
                   placeholderTextColor="#8B4513"
-                  value={mobileNo}
-                  onChangeText={setMobileNo}
-                  keyboardType="phone-pad"
-                  maxLength={10}
+                  value={email}
+                  onChangeText={setemail}
                 />
               </Animated.View>
               <Animated.View style={[styles.button, { transform: [{ scale: buttonAnimation }] }]}>
