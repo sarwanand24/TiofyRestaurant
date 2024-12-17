@@ -139,19 +139,19 @@ const OrderHistory = () => {
 const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
-        backgroundColor: '#2E2E2E', // Dark background for night aesthetics
+        backgroundColor: '#68095f', // Dark background for night aesthetics
         padding: 10,
     },
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#FF1493', // Neon pink
+        color: '#ffff00', // Neon pink
         marginBottom: 20,
         textAlign: 'center',
     },
     noHistory: {
         fontSize: 18,
-        color: '#FF4500', // Neon orange
+        color: '#ffff00', // Neon orange
         textAlign: 'center',
     },
     filterContainer: {
@@ -160,16 +160,16 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     dateButton: {
-        backgroundColor: '#FFD700', // Neon yellow
+        backgroundColor: '#9f0d91', // Neon yellow
         padding: 3,
         borderRadius: 5,
     },
     dateText: {
         fontSize: 16,
-        color: '#000000', // Black text for contrast
+        color: 'white', // Black text for contrast
     },
     listItem: {
-        backgroundColor: '#4B0082', // Deep violet
+        backgroundColor: '#9f0d91', // Deep violet
         borderRadius: 10,
         padding: 15,
         marginBottom: 15,
@@ -177,27 +177,27 @@ const styles = StyleSheet.create({
     restaurantName: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#00FF00', // Neon green
+        color: 'white', // Neon green
     },
     orderNumber: {
         fontSize: 16,
-        color: '#00FFFF', // Neon cyan
+        color: 'white', // Neon cyan
     },
     userName: {
         fontSize: 16,
-        color: '#FF6347', // Neon red
+        color: 'white', // Neon red
     },
     status: {
         fontSize: 16,
-        color: '#FF4500', // Neon orange
+        color: 'white', // Neon orange
     },
     earning: {
         fontSize: 16,
-        color: '#FFD700', // Neon yellow
+        color: 'white', // Neon yellow
     },
     date: {
         fontSize: 16,
-        color: '#FF00FF', // Neon purple
+        color: '#ffff00', // Neon purple
     },
     modalContainer: {
         flex: 1,
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     closeButton: {
         marginTop: 20,
         padding: 10,
-        backgroundColor: '#FF6347', // Neon red
+        backgroundColor: '#ffff00', // Neon red
         borderRadius: 5,
     },
     closeButtonText: {

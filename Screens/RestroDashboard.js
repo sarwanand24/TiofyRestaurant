@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, Button, FlatList, PermissionsAndroid, ActivityIndicator, ToastAndroid, ScrollView } from 'react-native';
+import { View, Text, Image, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity, Button, FlatList,
+   PermissionsAndroid, ActivityIndicator, ToastAndroid, ScrollView, Alert } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
@@ -7,6 +8,7 @@ import socket from '../utils/Socket';
 import { getAccessToken } from '../utils/auth';
 import Loading from './Loading';
 import { Switch } from 'react-native-paper';
+import LottieView from 'lottie-react-native';
 
 const RestroDashboard = (props) => {
   const [restaurant, setRestaurant] = useState({});
@@ -19,6 +21,7 @@ const RestroDashboard = (props) => {
   const [greeting, setGreeting] = useState('');
   const [earningOf, setEarningOf] = useState('Today');
   const [earningData, setEarningData] = useState(null);
+  const [orderLoader, setOrderLoader] = useState(false);
 
   useEffect(() => {
     const updateGreeting = async() => {
@@ -51,7 +54,7 @@ const RestroDashboard = (props) => {
     if(restaurant._id){
       try {
         const response = await axios.get(
-          "https://3cfd-2401-4900-72ab-8824-e97f-4592-f513-61e1.ngrok-free.app/api/v1/restaurants/get-earnings",
+          "https://trioserver.onrender.com/api/v1/restaurants/get-earnings",
           {
             params: { restroId: restaurant?._id },
           }
@@ -101,6 +104,7 @@ const RestroDashboard = (props) => {
   useEffect(()=>{
     const toggleStatus = async() => {
      try {
+      setLoading(true);
      if(online !== null){
        const token = await getAccessToken();
        const response = await axios.post(
@@ -128,7 +132,7 @@ const RestroDashboard = (props) => {
          ToastAndroid.SHORT,
          ToastAndroid.CENTER
        );
-     }
+     }finally{setLoading(false);}
     }
     toggleStatus();
    }, [toggle])
@@ -150,7 +154,7 @@ const RestroDashboard = (props) => {
       setOrderInfo(response.data.data.length > 0);
     } catch (error) {
       console.log('Error fetching Accept/Reject:', error);
-      alert('Error fetching Accept/Reject');
+      Alert.alert('Error fetching Accept/Reject');
     }
   };
 
@@ -200,7 +204,7 @@ const RestroDashboard = (props) => {
       if (data.data.deviceToken) {
         await AsyncStorage.setItem('deviceToken', data.data.deviceToken);
       } else {
-        alert(data.data);
+        console.log('no device token found!')
       }
     } catch (error) {
       console.log('Error in Storing Device Token:', error);
@@ -209,6 +213,7 @@ const RestroDashboard = (props) => {
   }
 
   const OrderAccepted = (restro) => {
+    setOrderLoader(true);
     const city = restaurant.city;
     const restroName = restaurant.restaurantName;
     const restroAddress = restaurant.address;
@@ -226,6 +231,7 @@ const RestroDashboard = (props) => {
       restroAddress,
     });
     setRefresh(true);
+    setOrderLoader(false);
   };
 
   const OrderRejected = (restro) => {
@@ -234,112 +240,133 @@ const RestroDashboard = (props) => {
   };
 
   const AcceptReject = ({ item }) => (
-    <View style={styles.orderContainer}>
-      <View style={styles.foodItemsContainer}>
-        {item.foodItems.map((food, index) => (
-          <Text key={index} style={styles.foodItem}>
-            {food.name} : {food.quantity}
-          </Text>
-        ))}
+    orderLoader ? (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="white" />
       </View>
-      <Text style={styles.totalItems}>Total Items: {item.totalItems}</Text>
-      <Text style={styles.totalItems}>Earnings: Rs {item.restroBill}</Text>
-      <View style={styles.buttonContainer}>
-        <Button title="Accept" onPress={() => OrderAccepted(item)} color="#00FF00" />
-        <Button title="Reject" onPress={() => OrderRejected(item)} color="#FF0000" />
+    ) : (
+      <View style={styles.orderContainer}>
+        <Text style={styles.totalItems}>OrderId: {item._id}</Text>
+        <View style={styles.foodItemsContainer}>
+          {item.foodItems.map((food, index) => (
+            <Text key={index} style={styles.foodItem}>
+              {food.name} : {food.quantity}
+            </Text>
+          ))}
+        </View>
+        <Text style={styles.totalItems}>Total Items: {item.totalItems}</Text>
+        <Text style={styles.totalItems}>Earnings: Rs {item.restroBill}</Text>
+        <View style={styles.buttonContainer}>
+          <Button title="Accept" onPress={() => OrderAccepted(item)} color="#00FF00" />
+          <Button title="Reject" onPress={() => OrderRejected(item)} color="#FF0000" />
+        </View>
       </View>
-    </View>
+    )
   );
+  
 
   if (loading) {
     return <Loading />;
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <StatusBar barStyle="light-content" />
-      <View style={styles.header}>
-      <View style={styles.toggle}>
-                     <Switch value={online} onValueChange={onToggleSwitch} color='green' />
-                     <Text style={{color:'green'}}>{online ? 'Online' : 'Offline'}</Text>
-                </View>
-        <Text style={styles.restaurantName}>{restaurant.restaurantName}</Text>
+    <View style={styles.container}>
+     <StatusBar color={'transparent'} />
+     {restaurant?.verified ? (
+  <ScrollView>
+  <View style={styles.header}>
+  <View style={styles.toggle}>
+                 <Switch value={online} onValueChange={onToggleSwitch} color='#ffff00' />
+                 <Text style={{color:'#ffff00'}}>{online ? 'Online' : 'Offline'}</Text>
+            </View>
+    <Text style={styles.restaurantName}>{restaurant.restaurantName}</Text>
+  </View>
+     {/*** Greeting *****/}
+     <View>
+  <Text style={styles.greetingText}>{greeting} {restaurant?.ownerName}!</Text>
+    </View>
+
+  {orderInfo ? (
+    <FlatList
+      data={orderData}
+      renderItem={AcceptReject}
+      keyExtractor={(item, index) => index.toString()}
+      style={styles.list}
+    />
+  ) : (
+    <View style={styles.noOrdersContainer}>
+      <Text style={styles.noOrdersText}>No orders yet.</Text>
+    </View>
+  )}
+
+<View style={styles.progressContainer}>
+      <Text style={{color:'white', fontSize:16, fontWeight:'bold'}}>My Progress</Text>
+      <View style={styles.progressBtn}>
+        <TouchableOpacity 
+        onPress={()=>{setEarningOf('Today')}}
+        style={[styles.progressBtn2, earningOf == 'Today' ? {backgroundColor:'#68095f'} : null]}>
+          <Text style={earningOf == 'Today' ? {color:'white'} : {color:'white'}}>Today</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+         onPress={()=>{setEarningOf('This Week')}}
+         style={[styles.progressBtn2, earningOf == 'This Week' ? {backgroundColor:'#68095f'} : null]}>
+          <Text style={earningOf == 'This Week' ? {color:'white'} : {color:'white'}}>This Week</Text>
+        </TouchableOpacity>
       </View>
-         {/*** Greeting *****/}
-         <View>
-      <Text style={styles.greetingText}>{greeting} {restaurant?.ownerName}!</Text>
+
+      <View style={styles.horizontalLine} >
+      <View style={{width: '80%'}} />
+    </View>
+
+      <View style={styles.earningContainer}>
+        <View>
+           <Text style={{color:'white'}}>
+            Rs {earningOf == 'Today'? earningData?.todayEarnings : earningData?.totalEarnings}
+            </Text>
+           <Text style={{color:'#ffff00'}}>Earnings</Text>
         </View>
-
-      {orderInfo ? (
-        <FlatList
-          data={orderData}
-          renderItem={AcceptReject}
-          keyExtractor={(item, index) => index.toString()}
-          style={styles.list}
-        />
-      ) : (
-        <View style={styles.noOrdersContainer}>
-          <Text style={styles.noOrdersText}>No orders yet.</Text>
+        <View>
+           <Text style={{color:'white'}}>
+            {earningOf == 'Today'? earningData?.todayOrders : earningData?.totalOrders}
+            </Text>
+           <Text style={{color:'#ffff00'}}>Orders</Text>
         </View>
-      )}
+      </View>
+    </View>
 
-   <View style={styles.progressContainer}>
-          <Text style={{color:'white', fontSize:16, fontWeight:'bold'}}>My Progress</Text>
-          <View style={styles.progressBtn}>
-            <TouchableOpacity 
-            onPress={()=>{setEarningOf('Today')}}
-            style={[styles.progressBtn2, earningOf == 'Today' ? {backgroundColor:'white'} : null]}>
-              <Text style={earningOf == 'Today' ? {color:'black'} : {color:'white'}}>Today</Text>
-            </TouchableOpacity>
+  <TouchableOpacity
+    style={styles.historyButton}
+    onPress={() => props.navigation.push('CancelledOrders')}
+  >
+    <Text style={styles.historyButtonText}>See All Cancelled Orders</Text>
+  </TouchableOpacity>
 
-            <TouchableOpacity
-             onPress={()=>{setEarningOf('This Week')}}
-             style={[styles.progressBtn2, earningOf == 'This Week' ? {backgroundColor:'white'} : null]}>
-              <Text style={earningOf == 'This Week' ? {color:'black'} : {color:'white'}}>This Week</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.horizontalLine} >
-          <View style={{width: '80%'}} />
-        </View>
-
-          <View style={styles.earningContainer}>
-            <View>
-               <Text style={{color:'white'}}>
-                Rs {earningOf == 'Today'? earningData?.todayEarnings : earningData?.totalEarnings}
-                </Text>
-               <Text style={{color:'white'}}>Earnings</Text>
-            </View>
-            <View>
-               <Text style={{color:'white'}}>
-                {earningOf == 'Today'? earningData?.todayOrders : earningData?.totalOrders}
-                </Text>
-               <Text style={{color:'white'}}>Orders</Text>
-            </View>
-          </View>
-        </View>
-
-      <TouchableOpacity
-        style={styles.historyButton}
-        onPress={() => props.navigation.push('CancelledOrders')}
-      >
-        <Text style={styles.historyButtonText}>See All Cancelled Orders</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.historyButton}
-        onPress={() => props.navigation.push('OrderHistory')}
-      >
-        <Text style={styles.historyButtonText}>See Order History</Text>
-      </TouchableOpacity>
-    </ScrollView>
+  <TouchableOpacity
+    style={styles.historyButton}
+    onPress={() => props.navigation.push('OrderHistory')}
+  >
+    <Text style={styles.historyButtonText}>See Order History</Text>
+  </TouchableOpacity>
+</ScrollView>
+     ) : (
+      <View style={styles.verificationContainer}>
+      <LottieView source={require('../assets/Animations/verifying.json')}
+      style={styles.lottie} autoPlay loop />
+ 
+   <Text style={{padding:10 ,color:'white', textAlign:'center', fontStyle: 'italic', fontSize:20, fontWeight:'800'}}>
+     Your RestaurantId verification is under process. It may take few hours to verify.
+     </Text>
+ </View>
+     )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1b003b',
+    backgroundColor: '#68095f',
   },
   header: {
     flexDirection: 'row',
@@ -347,20 +374,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#2d004f',
+    backgroundColor: '#9f0d91',
     borderBottomWidth: 2,
-    borderBottomColor: '#7f00ff',
+    borderBottomColor: '#ffff00',
   },
   profileIcon: {
     width: 60,
     height: 60,
     borderRadius: 30,
     borderWidth: 2,
-    borderColor: '#ff009e',
+    borderColor: 'white',
   },
   restaurantName: {
     flex: 1,
-    color: '#ffffff',
+    color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
@@ -368,7 +395,7 @@ const styles = StyleSheet.create({
   },
   orderContainer: {
     padding: 20,
-    backgroundColor: '#2d004f',
+    backgroundColor: '#9f0d91',
     marginVertical: 10,
     borderRadius: 10,
   },
@@ -376,11 +403,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   foodItem: {
-    color: '#ffffff',
+    color: 'white',
     fontSize: 16,
   },
   totalItems: {
-    color: '#ffffff',
+    color: 'white',
     fontSize: 18,
     marginBottom: 10,
   },
@@ -397,13 +424,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   noOrdersText: {
-    color: '#ffffff',
+    color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
   },
   historyButton: {
     padding: 15,
-    backgroundColor: '#7f00ff',
+    backgroundColor: '#9f0d91',
     alignItems: 'center',
     justifyContent: 'center',
     margin: 20,
@@ -416,14 +443,17 @@ const styles = StyleSheet.create({
   },
   greetingText: {
     textAlign: 'center',
-    color: '#5ecdf9',
+    color: '#68095f',
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10
   },
   progressContainer: {
     padding: 15,
-    backgroundColor: '#5ecdf9',
+    backgroundColor: '#9f0d91',
+    borderRadius: 20,
+    width: '90%',
+    marginHorizontal: '5%'
   },
   progressBtn: {
     flexDirection: 'row',
@@ -434,7 +464,7 @@ const styles = StyleSheet.create({
   progressBtn2: {
    padding: 8,
    borderWidth: 2,
-   borderColor: 'lightgreen',
+   borderColor: '#ffff00',
    borderRadius: 15
   },
   earningContainer: {
@@ -446,8 +476,23 @@ const styles = StyleSheet.create({
   horizontalLine: {
     height: 1,
     marginHorizontal: 30,
-    backgroundColor: '#b9b3b9',
+    backgroundColor: 'white',
   },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#9f0d91',
+},
+verificationContainer: {
+  flex: 1,
+ justifyContent:'center',
+ alignItems: 'center'
+},
+lottie: {
+  width: '60%',
+  height: '60%',
+}
 });
 
 export default RestroDashboard;

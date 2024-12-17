@@ -20,6 +20,7 @@ const CancelledOrders = () => {
 
   const renderOrder = ({ item }) => (
     <View style={styles.orderContainer}>
+        <Text style={styles.orderText}>OrderId: {item._id}</Text>
       <Text style={styles.orderText}>Ordered From: {item.orderedFromLocation}</Text>
       {item.items.map((food, index) => (
         <Text key={index} style={styles.foodItem}>
@@ -49,18 +50,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F5F5F5', // Light grey background
+    backgroundColor: '#68095f', // Light grey background
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 16,
-    color: '#003366', // Dark blue for the title
+    color: '#ffff00', // Dark blue for the title
   },
   orderContainer: {
     padding: 16,
     marginBottom: 8,
-    backgroundColor: '#FFFFFF', // White background for each order
+    backgroundColor: '#9f0d91', // White background for each order
     borderRadius: 8,
     shadowColor: '#000000', // Subtle shadow effect
     shadowOffset: { width: 0, height: 2 },
@@ -70,12 +71,12 @@ const styles = StyleSheet.create({
   },
   orderText: {
     fontSize: 16,
-    color: '#333333', // Dark grey text
+    color: 'white', // Dark grey text
     marginBottom: 8,
   },
   foodItem: {
     fontSize: 16,
-    color: '#0066CC', // Light blue for food items
+    color: '#ffff00', // Light blue for food items
     marginBottom: 4,
   },
 });

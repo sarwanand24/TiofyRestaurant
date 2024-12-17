@@ -11,6 +11,7 @@ import {
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
+import Loading from "./Loading";
 
 const Earnings = () => {
   const [data, setData] = useState(null);
@@ -57,7 +58,7 @@ const Earnings = () => {
         try {
           setLoading(true);
           const response = await axios.get(
-            "https://3cfd-2401-4900-72ab-8824-e97f-4592-f513-61e1.ngrok-free.app/api/v1/restaurants/earning-history",
+            "https://trioserver.onrender.com/api/v1/restaurants/earning-history",
             {
               params: { restroId: restroData._id },
             }
@@ -84,9 +85,7 @@ const Earnings = () => {
 
   if (loading) {
     return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
+        <Loading />
     );
   }
 
@@ -168,19 +167,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#68095f",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 8,
+    color: '#ffff00'
   },
   subtitle: {
     fontSize: 18,
     fontWeight: "bold",
     textAlign: "center",
-    color: "#555",
+    color: "#ffff00",
     marginBottom: 16,
   },
   totalEarnings: {
@@ -188,7 +188,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 16,
-    color: "#2e7d32",
+    color: "white",
   },
   tabContainer: {
     flexDirection: "row",
@@ -200,19 +200,19 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginHorizontal: 5,
     borderRadius: 5,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: "#9f0d91",
   },
   activeTab: {
-    backgroundColor: "#4caf50",
+    backgroundColor: "#ffff00",
   },
   tabText: {
     textAlign: "center",
     fontSize: 16,
     fontWeight: "bold",
-    color: "#555",
+    color: "white",
   },
   activeTabText: {
-    color: "#fff",
+    color: "black",
   },
   list: {
     paddingHorizontal: 16,
@@ -227,15 +227,18 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 16,
     fontWeight: "bold",
+    color: 'black'
   },
   details: {
     fontSize: 14,
     marginTop: 4,
+    color: 'black'
   },
   loading: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: '#68095f'
   },
   errorContainer: {
     flex: 1,
@@ -243,7 +246,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   errorText: {
-    color: "red",
+    color: "black",
     fontSize: 16,
   },
 });

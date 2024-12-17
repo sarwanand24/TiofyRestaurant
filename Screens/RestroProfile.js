@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, SafeAreaView, ToastAndroid, Button, PermissionsAndroid } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, SafeAreaView, ToastAndroid, Button, PermissionsAndroid, TextInput, TouchableOpacity } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import axios from 'axios';
 import Loading from './Loading'; // Assuming you have a Loading component
@@ -7,6 +7,14 @@ import { getAccessToken } from '../utils/auth';
 
 const RestroProfile = () => {
   const [restaurant, setRestaurant] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [email, setEmail] = useState('');
+  const [mobileNo, setMobileNo] = useState('');
+  const [address, setAddress] = useState('');
+  const [cuisineType, setCuisineType] = useState('');
+  const [openingTime, setOpeningTime] = useState('');
+  const [closingTime, setClosingTime] = useState('');
+  const [restaurantName, setRestaurantName] = useState('');
   const [loading, setLoading] = useState(false);
   const [availableStatus, setAvailableStatus] = useState(true);
 
@@ -167,6 +175,23 @@ const RestroProfile = () => {
     }
   }
 
+  const handleSave = async () => {
+    try {
+      const token = await getAccessToken();
+      if (token) {
+        const response = await axios.put(
+          'https://trioserver.onrender.com/api/v1/restaurants/update-details',
+          { email, mobileNo, address, cuisineType, restaurantName, openingTime, closingTime },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setRiderData(response.data.data);
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.log('Error updating rider data:', error);
+    }
+  };
+
   if (loading) {
     return <Loading />;
   }
@@ -183,13 +208,22 @@ const RestroProfile = () => {
       : null
   }}
 />
-          <Text style={styles.restaurantName}>{restaurant.restaurantName}</Text>
+{isEditing ? (
+            <TextInput
+              style={styles.input}
+              value={restaurantName}
+              onChangeText={setRestaurantName}
+            />
+          ) : (
+            <Text style={styles.restaurantName}>{restaurant.restaurantName}</Text>
+          )}
         </View>
 
            <Button
           title="Update My Restro Location"
           onPress={checkLocationPermission}
-          color="#FF007F" // Neon pink color
+          color="#68095f" // Neon pink color
+          styles={{marginBottom: 10}}
         />
 
 <Button
@@ -207,27 +241,100 @@ const RestroProfile = () => {
           <View style={styles.row}>
             <View style={styles.halfCard}>
               <Text style={styles.label}>Contact:</Text>
-              <Text style={styles.value}>{restaurant.mobileNo}</Text>
+              {isEditing ? (
+            <TextInput
+              style={styles.input}
+              value={mobileNo}
+              onChangeText={setMobileNo}
+            />
+          ) : (
+            <Text style={styles.value}>{restaurant.mobileNo}</Text>
+          )}
               <Text style={styles.value}>{restaurant?.alternateMobileNo}</Text>
             </View>
 
             <View style={styles.halfCard}>
               <Text style={styles.label}>Email:</Text>
-              <Text style={styles.value}>{restaurant.email}</Text>
+              {isEditing ? (
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+            />
+          ) : (
+            <Text style={styles.value}>{restaurant.email}</Text>
+          )}
+            </View>
+
+            <View style={styles.halfCard}>
+              <Text style={styles.label}>Address:</Text>
+              {isEditing ? (
+            <TextInput
+              style={styles.input}
+              value={address}
+              onChangeText={setAddress}
+            />
+          ) : (
+            <Text style={styles.value}>{restaurant?.address || 'unknown'}</Text>
+          )}
             </View>
           </View>
 
           <View style={styles.row}>
             <View style={styles.halfCard}>
               <Text style={styles.label}>Opening Time:</Text>
-              <Text style={styles.value}>{restaurant.openingTime}</Text>
+              {isEditing ? (
+            <TextInput
+              style={styles.input}
+              value={openingTime}
+              onChangeText={setOpeningTime}
+            />
+          ) : (
+            <Text style={styles.value}>{restaurant.openingTime}</Text>
+          )}
             </View>
 
             <View style={styles.halfCard}>
               <Text style={styles.label}>Closing Time:</Text>
-              <Text style={styles.value}>{restaurant.closingTime}</Text>
+              {isEditing ? (
+            <TextInput
+              style={styles.input}
+              value={closingTime}
+              onChangeText={setClosingTime}
+            />
+          ) : (
+            <Text style={styles.value}>{restaurant.closingTime}</Text>
+          )}
             </View>
           </View>
+
+          <View style={styles.card}>
+            <Text style={styles.label}>CuisineType:</Text>
+            {isEditing ? (
+            <TextInput
+              style={styles.input}
+              value={cuisineType}
+              onChangeText={setCuisineType}
+            />
+          ) : (
+            <Text style={styles.value}>{restaurant?.cuisineType || 'unknown'}</Text>
+          )}
+          </View>
+
+          {isEditing && (
+            <TouchableOpacity
+            style={{backgroundColor:'#9f0d91', marginVertical:10, width:'60%', borderRadius:20, padding:8, marginHorizontal:'auto'}}
+             onPress={handleSave}
+           >
+             <Text style={{textAlign:'center', color:'white'}}>Save</Text>
+           </TouchableOpacity>
+        )}
+        <TouchableOpacity
+        style={{backgroundColor:'#9f0d91', marginVertical:10, width:'60%', borderRadius:20, padding:8, marginHorizontal:'auto'}}
+          onPress={() => setIsEditing(!isEditing)}
+        >
+          <Text style={{textAlign:'center', color:'white'}}>{isEditing ? 'Cancel' : 'Edit'}</Text>
+        </TouchableOpacity>
 
           <View style={styles.card}>
             <Text style={styles.label}>FSSAI Details</Text>
@@ -272,11 +379,11 @@ const RestroProfile = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0d0d0d', // Deep black background for the Noir effect
+    backgroundColor: '#68095f', // Deep black background for the Noir effect
   },
   header: {
     alignItems: 'center',
-    backgroundColor: '#1a1a1a', // Darker shade for the header
+    backgroundColor: '#9f0d91', // Darker shade for the header
     paddingVertical: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#333333', // Border for slight contrast
@@ -286,7 +393,7 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     borderWidth: 3,
-    borderColor: '#FF007F', // Neon pink border
+    borderColor: '#ffff00', // Neon pink border
   },
   restaurantName: {
     marginTop: 15,
@@ -294,13 +401,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#00FFFF', // Neon cyan color
     fontFamily: 'serif',
-    textShadowColor: '#FF007F', // Neon shadow
+    textShadowColor: '#ffff00', // Neon shadow
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 5,
   },
   detailsContainer: {
     padding: 20,
-    backgroundColor: '#1a1a1a', // Same as header for consistency
+    backgroundColor: '#9f0d91', // Same as header for consistency
   },
   row: {
     flexDirection: 'row',
@@ -310,7 +417,7 @@ const styles = StyleSheet.create({
   card: {
     padding: 15,
     marginBottom: 20,
-    backgroundColor: '#0d0d0d', // Card background
+    backgroundColor: '#68095f', // Card background
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#333333',
@@ -318,7 +425,7 @@ const styles = StyleSheet.create({
   halfCard: {
     flex: 1,
     padding: 15,
-    backgroundColor: '#0d0d0d', // Card background
+    backgroundColor: '#68095f', // Card background
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#333333',
@@ -333,11 +440,17 @@ const styles = StyleSheet.create({
   },
   value: {
     fontSize: 16,
-    color: '#FF007F', // Neon pink for values
+    color: '#ffff00', // Neon pink for values
     fontFamily: 'serif',
     textShadowColor: '#333333', // Subtle shadow for depth
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
+  },
+  input:{
+    backgroundColor:'#9f0d91',
+    color:'white',
+    width: '80%',
+    borderRadius: 20
   },
 });
 

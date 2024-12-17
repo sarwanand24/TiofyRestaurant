@@ -1,5 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Easing, ActivityIndicator, Image, ScrollView } from 'react-native';
+import {
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Easing, ActivityIndicator, Image,
+  ScrollView, Alert
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import axios from 'axios';
 import ImagePicker from 'react-native-image-crop-picker';
@@ -10,6 +13,7 @@ import Loading from '../Loading';
 const Signup = (props) => {
   const [restroName, setRestroName] = useState('');
   const [ownerName, setOwnerName] = useState('');
+  const [cuisineType, setCuisineType] = useState('');
   const [fssaiNo, setFssaiNo] = useState('');
   const [fssaiExpiryDate, setFssaiExpiryDate] = useState('');
   const [openingTime, setOpeningTime] = useState('');
@@ -26,6 +30,11 @@ const Signup = (props) => {
   const [citySuggestions, setCitySuggestions] = useState([]);
   const [query, setQuery] = useState('');
   const [restroDetails, setRestroDetails] = useState(null);
+  const [accountNumber, setAccountNumber] = useState('');
+  const [ifscCode, setIfscCode] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [branch, setBranch] = useState('');
+  const [ifscError, setIfscError] = useState('');
 
   // Animations
   const buttonAnimation = useRef(new Animated.Value(1)).current;
@@ -80,6 +89,12 @@ const Signup = (props) => {
       formData.append('fssaiExpiryDate', fssaiExpiryDate);
       formData.append('restaurantPhotoImg', restaurantImage);
       formData.append('city', city);
+      formData.append('accountNumber', accountNumber);
+      formData.append('ifscCode', ifscCode);
+      formData.append('bankName', bankName);
+      formData.append('branch', branch);
+      formData.append('cuisineType', cuisineType);
+
 
       const response = await axios.post('https://trioserver.onrender.com/api/v1/restaurants/register', formData, {
         headers: {
@@ -92,9 +107,10 @@ const Signup = (props) => {
       console.log('SUCCESS SIGNUP');
       await AsyncStorage.setItem("token", response.data.data.refreshToken);
       await AsyncStorage.setItem("Restrodata", JSON.stringify(response.data.data.Restaurant));
-      props.navigation.pop(); 
-      props.navigation.replace('MainApp'); 
+      props.navigation.pop();
+      props.navigation.replace('MainApp');
     } catch (error) {
+      Alert.alert('Error in Signup Process, Please try again later.')
       console.error(error);
       // Handle error
     } finally {
@@ -109,29 +125,29 @@ const Signup = (props) => {
       includeBase64: true,
     };
 
-   
-      ImagePicker.openPicker(options).then(image => {
-        const data = `data:${image.mime};base64,${image.data}`;
-        setRestaurantImage(data);
-      }).catch(err => console.log(err));
+
+    ImagePicker.openPicker(options).then(image => {
+      const data = `data:${image.mime};base64,${image.data}`;
+      setRestaurantImage(data);
+    }).catch(err => console.log(err));
   };
 
   const fetchCities = async (text) => {
     setQuery(text);
     if (text.length >= 2) {
       try {
-          const response = await axios.get(
-            `https://nominatim.openstreetmap.org/search`, {
-                params: {
-                    q: text,
-                    format: 'json',
-                    addressdetails: 1,
-                    limit: 10,
-                },
-                headers: {
-                    'User-Agent': 'TiofyRestaurant/1.0'  // Replace with your app's name
-                }
-            }
+        const response = await axios.get(
+          `https://nominatim.openstreetmap.org/search`, {
+          params: {
+            q: text,
+            format: 'json',
+            addressdetails: 1,
+            limit: 10,
+          },
+          headers: {
+            'User-Agent': 'TiofyRestaurant/1.0'  // Replace with your app's name
+          }
+        }
         );
         setCitySuggestions(response.data || []);
       } catch (error) {
@@ -149,7 +165,39 @@ const Signup = (props) => {
     setCitySuggestions([]); // Clear suggestions after selection
   };
 
-  if(loading){
+  const fetchBankDetails = async () => {
+    if (!ifscCode.trim() || !(ifscCode?.length === 11)) {
+      setIfscError('Please enter a valid IFSC code.');
+      return;
+    }
+
+    try {
+      console.log('code---', ifscCode)
+      const response = await axios.get(`https://ifsc.razorpay.com/${ifscCode}`,
+        {
+          headers: {
+            'User-Agent': 'TiofyRider/1.0',  // Replace with your app's name
+            'Content': 'application/json',
+          }
+        }
+      );
+      console.log(response)
+      setBankName(response.data.BANK || '');
+      setBranch(response.data.BRANCH || '');
+      setIfscError(''); // Clear error if successful
+    } catch (error) {
+      console.error('Error fetching bank details:', error);
+      setIfscError('Invalid IFSC code. Please try again.');
+      setBankName('');
+      setBranch('');
+    }
+  };
+
+  useEffect(() => {
+    fetchBankDetails();
+  }, [ifscCode])
+
+  if (loading) {
     return (
       <Loading />
     )
@@ -158,7 +206,7 @@ const Signup = (props) => {
   return (
     <LinearGradient colors={['#1e1e1e', '#292929']} style={styles.container}>
       <ScrollView>
-      <Text style={styles.title}>Signup</Text>
+        <Text style={styles.title}>Signup</Text>
         <View>
           <TextInput
             style={styles.input}
@@ -250,40 +298,80 @@ const Signup = (props) => {
             value={closingTime}
             onChangeText={setClosingTime}
           />
-           {/* <TextInput
+          <TextInput
+            style={styles.input}
+            placeholder="CuisineType"
+            placeholderTextColor="#ccc"
+            value={cuisineType}
+            onChangeText={setCuisineType}
+          />
+
+          <Autocomplete
+            data={citySuggestions}
+            defaultValue={query}
+            onChangeText={fetchCities}
+            flatListProps={{
+              keyExtractor: (item) => item.place_id.toString(), // Ensure unique key for each item
+              renderItem: ({ item }) => (
+                <TouchableOpacity onPress={() => handleCitySelection(item)}>
+                  <Text style={styles.suggestionItem}>
+                    {item.name}, {item.address.state}, {item.address.country}
+                  </Text>
+                </TouchableOpacity>
+              ),
+            }}
+            inputContainerStyle={styles.inputContainer}
+            listStyle={styles.listStyle}
             style={styles.input}
             placeholder="City"
             placeholderTextColor="#ccc"
-            value={city}
-            onChangeText={setCity}
-          /> */}
-             <Autocomplete
-        data={citySuggestions}
-        defaultValue={query}
-        onChangeText={fetchCities}
-        flatListProps={{
-          keyExtractor: (item) => item.place_id.toString(), // Ensure unique key for each item
-          renderItem: ({ item }) => (
-            <TouchableOpacity onPress={() => handleCitySelection(item)}>
-              <Text style={styles.suggestionItem}>
-                {item.name}, {item.address.state}, {item.address.country}
-              </Text>
-            </TouchableOpacity>
-          ),
-        }}
-        inputContainerStyle={styles.inputContainer}
-        listStyle={styles.listStyle}
-        style={styles.input}
-        placeholder="City"
-        placeholderTextColor="#ccc"
-      />
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Enter Bank Account Number"
+            placeholderTextColor="#ccc"
+            value={accountNumber}
+            onChangeText={setAccountNumber}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Enter IFSC Code"
+            placeholderTextColor="#ccc"
+            value={ifscCode}
+            onChangeText={(value) => {
+              setIfscCode(value);
+              if (value.length === 11) { // Trigger fetch when IFSC code is 11 characters long
+                fetchBankDetails();
+              }
+            }}
+          />
+          {ifscError ? <Text style={styles.errorText}>{ifscError}</Text> : null}
+
+          <TextInput
+            style={[styles.input, { backgroundColor: '#f0f0f0', color: 'black' }]} // Disabled styling
+            placeholder="Bank Name"
+            placeholderTextColor="#999"
+            value={bankName}
+            onChangeText={setBankName}
+          />
+
+          <TextInput
+            style={[styles.input, { backgroundColor: '#f0f0f0', color: 'black' }]} // Disabled styling
+            placeholder="Branch"
+            placeholderTextColor="#999"
+            value={branch}
+            onChangeText={setBranch}
+          />
+
           <Animated.View style={[styles.button, { transform: [{ scale: buttonAnimation }] }]}>
             <TouchableOpacity style={styles.buttonInner} onPress={handleSignup}>
               <Text style={styles.buttonText}>Sign Up</Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
-   </ScrollView>
+      </ScrollView>
     </LinearGradient>
   );
 };

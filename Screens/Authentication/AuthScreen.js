@@ -38,7 +38,7 @@ const AuthScreen = ({ navigation }) => {
 
   return (
     <LinearGradient
-      colors={['#ff7e5f', '#feb47b']}
+      colors={['#68095f', '#9f0d91']}
       style={styles.gradientBackground}
     >
       <Animated.View style={{ ...styles.container, opacity: fadeAnim }}>
@@ -54,7 +54,7 @@ const AuthScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('Login')}
           >
             <LinearGradient
-              colors={['#ee0979', '#ff6a00']}
+              colors={['#9f0d91', '#68095f']}
               style={styles.gradientButton}
             >
               <Text style={styles.buttonText}>Login</Text>
@@ -68,7 +68,7 @@ const AuthScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('Signup')}
           >
             <LinearGradient
-              colors={['#ff6a00', '#ff9e00']}
+               colors={['#9f0d91', '#68095f']}
               style={styles.gradientButton}
             >
               <Text style={styles.buttonText}>Sign Up</Text>
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: 'center',
     marginBottom: 15,
-    backgroundColor: '#c56b70',
+    backgroundColor: '#ffff00',
   },
   gradientButton: {
     width: '100%',
