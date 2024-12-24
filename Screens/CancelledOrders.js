@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, StatusBar } from 'react-native';
 import axios from 'axios';
 
 const CancelledOrders = () => {
@@ -36,6 +36,7 @@ const CancelledOrders = () => {
 
   return (
     <View style={styles.container}>
+         <StatusBar color={'transparent'} backgroundColor={'#68095f'} />
       <Text style={styles.title}>Cancelled Orders</Text>
       <FlatList
         data={cancelledOrders}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Notifications = ({onMarkSeen, onUpdateBadge}) => {
@@ -17,6 +17,7 @@ const Notifications = ({onMarkSeen, onUpdateBadge}) => {
 
   return (
     <View style={styles.container}>
+         <StatusBar color={'transparent'} backgroundColor={'#68095f'} />
       <Text style={styles.header}>Notifications</Text>
       {notifications.length > 0 ? (
         <FlatList

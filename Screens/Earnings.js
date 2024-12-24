@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -117,6 +118,7 @@ const Earnings = () => {
 
   return (
     <ScrollView style={styles.container}>
+         <StatusBar color={'transparent'} backgroundColor={'#68095f'} />
       <Text style={styles.title}>Earning History</Text>
       <Text style={styles.totalEarnings}>
         Total Earnings: ₹{data.totalEarnings.toFixed(2)}

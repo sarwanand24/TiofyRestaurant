@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ScrollView, SafeAreaView, ToastAndroid, Button, PermissionsAndroid, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView, SafeAreaView, ToastAndroid, Button,
+   PermissionsAndroid, TextInput, TouchableOpacity, 
+   StatusBar} from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import axios from 'axios';
 import Loading from './Loading'; // Assuming you have a Loading component
@@ -198,6 +200,7 @@ const RestroProfile = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+         <StatusBar color={'transparent'} backgroundColor={'#68095f'} />
       <ScrollView>
         <View style={styles.header}>
         <Image

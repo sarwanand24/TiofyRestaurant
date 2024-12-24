@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 
 const More = (props) => {
@@ -13,6 +13,7 @@ const More = (props) => {
 
     return (
         <View style={styles.container}>
+               <StatusBar color={'transparent'} backgroundColor={'#68095f'} />
             <Text style={styles.headerText}>More</Text>
             <View style={styles.optionsContainer}>
                 <TouchableOpacity 

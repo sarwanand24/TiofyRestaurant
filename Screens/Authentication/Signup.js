@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Animated, Easing, ActivityIndicator, Image,
-  ScrollView, Alert
+  ScrollView, Alert,
+  StatusBar
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import axios from 'axios';
@@ -205,6 +206,7 @@ const Signup = (props) => {
 
   return (
     <LinearGradient colors={['#1e1e1e', '#292929']} style={styles.container}>
+         <StatusBar color={'transparent'} backgroundColor={'#68095f'} />
       <ScrollView>
         <Text style={styles.title}>Signup</Text>
         <View>

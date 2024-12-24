@@ -271,7 +271,7 @@ const RestroDashboard = (props) => {
 
   return (
     <View style={styles.container}>
-     <StatusBar color={'transparent'} />
+       <StatusBar color={'transparent'} backgroundColor={'#68095f'} />
      {restaurant?.verified ? (
   <ScrollView>
   <View style={styles.header}>

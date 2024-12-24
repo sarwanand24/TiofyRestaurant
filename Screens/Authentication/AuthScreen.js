@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, Animated, StatusBar } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
 // Get screen dimensions for responsive styling
@@ -41,6 +41,7 @@ const AuthScreen = ({ navigation }) => {
       colors={['#68095f', '#9f0d91']}
       style={styles.gradientBackground}
     >
+         <StatusBar color={'transparent'} backgroundColor={'#68095f'} />
       <Animated.View style={{ ...styles.container, opacity: fadeAnim }}>
         <Animated.Text style={[styles.title, { transform: [{ scale: scaleAnim }] }]}>
           Welcome to Tiofy Restaurant

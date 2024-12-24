@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Animated, Easing, StatusBar } from 'react-native';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from 'react-native-linear-gradient';
@@ -116,6 +116,7 @@ import socket from '../../utils/Socket';
 
   return (
     <LinearGradient colors={['#9E6F21', '#FFF4E3']} style={styles.container}>
+         <StatusBar color={'transparent'} backgroundColor={'#68095f'} />
       <Text style={styles.title}>Login</Text>
         <View>
         {error ? (
